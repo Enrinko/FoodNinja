@@ -1,0 +1,43 @@
+databases:
+  - name: shortlinks-db
+    databaseName: shortlinks
+    user: shortlinks
+    plan: free
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: shortlinks
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    envVars:
+      - key: APP_KEY
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: shortlinks-db
+          property: host
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        fromDatabase:
+          name: shortlinks-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: shortlinks-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: shortlinks-db
+          property: password
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database

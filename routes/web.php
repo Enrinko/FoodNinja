@@ -3,7 +3,8 @@
 use App\Http\Controllers\RedirectController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect('/admin'));
+// Route::redirect (not a closure) so the route table stays cacheable in production.
+Route::redirect('/', '/admin');
 
 /*
  * Public short-link redirect. Declared last and constrained to a 6-character

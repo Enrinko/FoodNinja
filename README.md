@@ -106,6 +106,36 @@ docker compose exec -u sail laravel.test php artisan test
 
 ---
 
+## Деплой на Render (production)
+
+> GitHub Pages для этого приложения не подходит — это серверный Laravel, ему нужен
+> хостинг с PHP и PostgreSQL. Используем **Render**: Docker + managed PostgreSQL,
+> авто-деплой из GitHub.
+
+Production-образ собирается из `Dockerfile` (официальный `php:8.3` + нужные
+расширения), `render.yaml` (Blueprint) описывает web-сервис + PostgreSQL, а кэш и
+миграции прогоняются при старте через `docker/entrypoint.sh`. HTTP отдаётся через
+`php artisan serve` на `$PORT` — достаточно для демо; для нагруженного прода
+замените на Laravel Octane или php-fpm + nginx.
+
+1. Render → **New → Blueprint** → подключить репозиторий и ветку с этими файлами →
+   Render прочитает `render.yaml` и создаст web-сервис + базу.
+2. Задать переменную **`APP_KEY`** (значение — вывод `php artisan key:generate --show`).
+3. После первого деплоя вписать выданный адрес в **`APP_URL`**
+   (`https://<name>.onrender.com`) и передеплоить.
+4. (Опц.) Демо-данные: Render → **Shell** → `php artisan db:seed --force`
+   (логин `demo@example.com` / `password`).
+5. Каждый `git push` в подключённую ветку автоматически передеплоивает.
+
+Проверка: `https://<name>.onrender.com/up` → 200; открывается `/admin/login`;
+регистрация → создание ссылки → переход по короткому URL даёт редирект и запись в статистике.
+
+**Ограничения бесплатного тарифа:** web-сервис засыпает после 15 мин простоя
+(холодный старт ~1 мин); бесплатный PostgreSQL живёт 30 дней. Для постоянного
+демо — апгрейд базы.
+
+---
+
 ## Архитектура (ключевые файлы)
 
 ```
